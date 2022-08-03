@@ -1,0 +1,7 @@
+name: create_dag
+
+channels:
+    - anaconda
+
+dependencies:
+    - graphviz=2.2

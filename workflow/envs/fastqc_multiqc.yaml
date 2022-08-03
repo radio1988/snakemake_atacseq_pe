@@ -1,0 +1,10 @@
+name: fastqc 
+
+channels:
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - fastqc
+  - multiqc
+  - dataclasses
