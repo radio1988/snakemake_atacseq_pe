@@ -1,2 +1,2 @@
-# snakemake_atacseq_pe
-Snakemake Workflow for ATACSeq (Paired-end)
+# Snakemake Workflow for ATACSeq (Paired-end)
+## snakemake_atacseq_pe
