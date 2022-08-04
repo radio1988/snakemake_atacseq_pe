@@ -23,7 +23,7 @@ rule bowtie2:
     input:
         genome=config['GENOME'],
         index_flag=config['GENOME']+'.bowtie2.index.done',
-        reads=["fastq/{sample}.R1.fastq.gz", "fastq/{sample}.R2.fastq.gz"]
+        reads=["results/trimmed_reads/{sample}.R1.fastq.gz", "results/trimmed_reads/{sample}.R2.fastq.gz"]
     output:
         temp("results/mapped_reads/{sample}.bam")
     params:
