@@ -1,11 +1,18 @@
-dirs = ['fastq', 'results/trimmed_reads'] # locate fastq files
+o2i = {
+        # from odir to idir
+        # idirs = ['fastq', 'results/trimmed_reads'] # locate fastq files
+        # odirs = ['results/fastqc_raw', 'results/fastqc_trimmed'] # fastqc outputs
+        'results/fastqc_raw':'fastq', 
+        'results/fastqc_trimmed':'results/trimmed_reads'
+    }
+
 rs = ['R1', 'R2']  # suffix
 
 rule fastqc:
     input:
-        '{d}/{s}.{r}.fastq.gz' 
+        lambda wildcards: '{id}/{s}.{r}.fastq.gz'.format(id=o2i[wildcards.d], s=wildcards.s, r=wildcards.r)
     output:
-        '{d}/fastqc/details/{s}.{r}_fastqc.zip'
+        '{d}/details/{s}.{r}_fastqc.zip'
     params:
         d='{d}'
     conda:
@@ -20,16 +27,16 @@ rule fastqc:
         '{d}/fastqc/details/{s}.{r}_fastqc.benchmark'
     shell:
         'which fastqc &> {log};'
-        'fastqc -t {threads} {input} -o results/fastqc_raw/details &>> {log};'
+        'fastqc -t {threads} {input} -o {params.d} &>> {log};'
 
 
 rule fastqc_multiqc:
     input:
-        expand('{{d}}/fastqc/details/{s}.{r}_fastqc.zip', 
+        expand('{{d}}/details/{s}.{r}_fastqc.zip', 
                 s=config['SAMPLES'], 
                 r=rs)
     output:
-        '{d}/fastqc/multiqc_report.html'
+        '{d}/multiqc_report.html'
     params:
         d='{d}'
     conda:
