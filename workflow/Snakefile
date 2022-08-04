@@ -13,7 +13,8 @@ shell.prefix("""
 def targets_input():
     L = []
     L.append('results/workflow.svg')
-    L.append('results/fastqc/multiqc_report.html')
+    L.append('results/fastqc_raw/multiqc_report.html')
+    L.append('results/fastqc_trimmed/multiqc_report.html')
     L.append(['results/sorted_reads/' + s + '.bam' for s in config['SAMPLES']])
 
 
@@ -27,4 +28,5 @@ rule targets:
 
 include: 'rules/create_dag.smk'
 include: 'rules/fastqc.smk'
+include: 'rules/trimmomatic.smk'
 include: 'rules/bowtie2.smk'

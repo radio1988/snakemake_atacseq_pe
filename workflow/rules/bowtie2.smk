@@ -28,7 +28,7 @@ rule bowtie2:
         temp("results/mapped_reads/{sample}.bam")
     params:
         reads="-1 fastq/{sample}.R1.fastq.gz -2 fastq/{sample}.R2.fastq.gz",
-        options=config['BOWTIE2_PARAMS']
+        options=config['BOWTIE2']
     resources:
         mem_mb=lambda wildcards, attempt: attempt * 1600 # human need 18G
     threads:
