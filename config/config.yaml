@@ -6,6 +6,7 @@ SAMPLES:
 # GENOME
 GENOME: /project/umw_mccb/genome/Mus_musculus_UCSC_mm10/mm10.ucsc.fa
 GTF: /project/umw_mccb/genome/Mus_musculus_UCSC_mm10/gencode.vM25.primary_assembly.annotation.gtf
+BLACKLIST: resources/Blacklist/lists/mm10-blacklist.v2.bed
 GSIZE: "mm"  # MACS2 gsize param, hs, mm, ce, dm, 2.7e8
 SizeFile: "/project/umw_mccb/genome/Mus_musculus_UCSC_mm10/star_idx/chrNameLength.txt" # for bedGraphToBigWig
 
@@ -13,14 +14,15 @@ SizeFile: "/project/umw_mccb/genome/Mus_musculus_UCSC_mm10/star_idx/chrNameLengt
 TRIMMOMATIC: 'ILLUMINACLIP:resources/adapters/TruSeq3-PE.fa:2:30:10 LEADING:10 TRAILING:10 SLIDINGWINDOW:4:15 MINLEN:24'
 
 # MAPPING
-BOWTIE2: '--sensitive'
+BOWTIE2: '--very-sensitive -k 10' # -k 10 for genrich
 FILTER: 'BEGIN{FS=OFS="\t"} function abs(v) {return v < 0 ? -v : v}; /^@/ || ($7 == "="  && ($2 == 81 || $2 == 161|| $2 == 97 || $2 == 145 || $2 ==99 || $2 == 147 || $2 == 83 || $2 ==163) && abs($9) <= 2000 && abs($9) >= 38 && $5 >=20 ) {print}' # awk script for bam_filter
 chrM: chrM  # Name of mitochondria in genome.fa, have to be exact match, this will be removed 
+GENRICH: '-j -y -d 100 -q 0.05 -a 200.0'
 
 
 # Filters for bamCoverage, plotFingerprint, multiBamSummary
 BIN_SIZE: 2000 # For plotFingerprint, multiBamSummary, 2000 for mouse ATAC-seq
-MQ_MIN: 0 # multiBamSummary, plotFingerprint
+MQ_MIN: 0 # multiBamSummary, plotFingerprint, genrich, default 0
 minFragmentLength: 50  # 100 for mono-nucleosome
 maxFragmentLength: 1000 # 200 for mono-nucleosome ATACseq fragments
 
