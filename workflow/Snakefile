@@ -19,6 +19,7 @@ def targets_input():
     L.append(['results/dedup/' + s + '.bam' for s in config['SAMPLES']])  # test
     L.append(['results/clean_reads/' + s + '.bam' for s in config['SAMPLES']])
     L.append(['results/{d}_qc/bamqc_report.html'.format(d=d) for d in ['sorted_reads', 'clean_reads', 'markDup']])
+    L.append(['results/genrich/{}.narrowPeak'.format(s) for s in config['SAMPLES']])
     return (L)
 
 rule targets:
@@ -34,3 +35,4 @@ include: 'rules/bowtie2.smk'
 include: 'rules/samtools.smk'
 include: 'rules/bam_filter.smk'
 include: 'rules/bamqc.smk'
+include: 'rules/genrich.smk'

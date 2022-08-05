@@ -1,4 +1,4 @@
-rule samtools_sort:
+rule samtools_location_sort:
     input:
         "results/mapped_reads/{s}.bam",
     output:
