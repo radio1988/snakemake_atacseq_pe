@@ -33,7 +33,7 @@ rule bowtie2:
         reads="-1 fastq/{sample}.R1.fastq.gz -2 fastq/{sample}.R2.fastq.gz",
         options=config["BOWTIE2"],
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * 1000,  
+        mem_mb=lambda wildcards, attempt: attempt * 1000,
     threads: 12
     log:
         "results/mapped_reads/{sample}.bowtie2.log",

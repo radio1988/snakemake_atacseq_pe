@@ -3,9 +3,7 @@ import pandas as pd
 from snakemake.utils import min_version
 
 min_version("6.14.0")
-
 configfile: 'config/config.yaml'
-
 shell.prefix("""
     
      """)
@@ -13,11 +11,14 @@ shell.prefix("""
 def targets_input():
     L = []
     L.append('results/workflow.svg')
-    L.append('results/fastqc_raw/multiqc_report.html')
-    L.append('results/fastqc_trimmed/multiqc_report.html')
+    L.append('results/fastqc_raw/fastqc_report.html')
+    L.append('results/fastqc_trimmed/fastqc_report.html')
+    L.append(['results/{d}/fastqc_report.html'.format(d=d) for d in ['fastqc_raw', 'fastqc_trimmed']])
     L.append(['results/sorted_reads/' + s + '.bam' for s in config['SAMPLES']])
-
-
+    L.append(['results/markDup/' + s + '.bam' for s in config['SAMPLES']])
+    L.append(['results/dedup/' + s + '.bam' for s in config['SAMPLES']])  # test
+    L.append(['results/clean_reads/' + s + '.bam' for s in config['SAMPLES']])
+    L.append(['results/{d}_qc/bamqc_report.html'.format(d=d) for d in ['sorted_reads', 'clean_reads', 'markDup']])
     return (L)
 
 rule targets:
@@ -31,3 +32,5 @@ include: 'rules/fastqc.smk'
 include: 'rules/trimmomatic.smk'
 include: 'rules/bowtie2.smk'
 include: 'rules/samtools.smk'
+include: 'rules/bam_filter.smk'
+include: 'rules/bamqc.smk'

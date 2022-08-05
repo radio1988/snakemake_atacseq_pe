@@ -1,6 +1,8 @@
 # bsub -q long -W 144:00 -R rusage[mem=4000]  -R select[rh=8] 'bash submit.sh'
 rm -f lsf.log
 
+source activate snake7
+
 snakemake -pk --jobs 99 \
 --use-conda --conda-prefix ~/anaconda/envs/snakemake_atacseq_pe \
 --latency-wait 20 --ri --restart-times 0 \

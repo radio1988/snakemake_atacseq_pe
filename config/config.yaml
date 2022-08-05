@@ -14,7 +14,7 @@ TRIMMOMATIC: 'ILLUMINACLIP:resources/adapters/TruSeq3-PE.fa:2:30:10 LEADING:10 T
 
 # MAPPING
 BOWTIE2: '--sensitive'
-filter: 'BEGIN{FS=OFS="\t"} function abs(v) {return v < 0 ? -v : v}; /^@/ || ($7 == "="  && ($2 == 81 || $2 == 161|| $2 == 97 || $2 == 145 || $2 ==99 || $2 == 147 || $2 == 83 || $2 ==163) && abs($9) <= 2000 && abs($9) >= 38 && $5 >=20 ) {print}' # need update from config, for cleanBam
+FILTER: 'BEGIN{FS=OFS="\t"} function abs(v) {return v < 0 ? -v : v}; /^@/ || ($7 == "="  && ($2 == 81 || $2 == 161|| $2 == 97 || $2 == 145 || $2 ==99 || $2 == 147 || $2 == 83 || $2 ==163) && abs($9) <= 2000 && abs($9) >= 38 && $5 >=20 ) {print}' # awk script for bam_filter
 chrM: chrM  # Name of mitochondria in genome.fa, have to be exact match, this will be removed 
 
 

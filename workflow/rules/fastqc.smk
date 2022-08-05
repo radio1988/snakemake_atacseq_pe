@@ -36,7 +36,7 @@ rule fastqc_multiqc:
     input:
         expand("{{d}}/details/{s}.{r}_fastqc.zip", s=config["SAMPLES"], r=rs),
     output:
-        "{d}/multiqc_report.html",
+        "{d}/fastqc_report.html",
     params:
         d="{d}",
     conda:
@@ -45,11 +45,11 @@ rule fastqc_multiqc:
         mem_mb=lambda wildcards, attempt: attempt * 1000,
     threads: 1
     log:
-        "{d}/multiqc_report.log",
+        "{d}/fastqc_report.log",
     benchmark:
-        "{d}/multiqc_report.benchmark"
+        "{d}/fastqc_report.benchmark"
     shell:
         """
         which multiqc &> {log};
-        multiqc {input} -f -o {params.d} &>> {log};
+        multiqc {input} -f -o {params.d} --title {wildcards.d} -n fastqc_report &>> {log};
         """

@@ -1,0 +1,4 @@
+workflow/.snakemake/
+workflow/envs/envs
+workflow/envs/envs2
+workflow/rules/chip_atac
