@@ -1,8 +1,3 @@
-# Analysis Params
-SAMPLES:
-    - Lrig1
-    - WT_RSmad7
-
 # GENOME
 GENOME: /project/umw_mccb/genome/Mus_musculus_UCSC_mm10/mm10.ucsc.fa
 GTF: /project/umw_mccb/genome/Mus_musculus_UCSC_mm10/gencode.vM25.primary_assembly.annotation.gtf

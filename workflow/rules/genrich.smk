@@ -42,5 +42,33 @@ rule genrich_sample:
         {params.options} \
         -m {params.MQ_MIN} -e {params.chrM} -E {params.BLACKLIST} &>>{log}"
 
-# rule genrich_group:
+              
+rule genrich_group:
+    input:
+        lambda wildcards: ["results/genrich/cleanBamByName/{}.bam".format(s) for s in g2s[wildcards.group]],
+    output:
+        peak="results/genrich_group/{group}.narrowPeak",
+        bedGraph=temp("results/genrich_group/{group}.bedgraph_ish")
+    log:
+        "results/genrich_group/{group}.narrowPeak.log",
+    benchmark:
+        "results/genrich_group/{group}.narrowPeak.benchmark"
+    params:
+        samples=lambda wildcards: ','.join(
+            ["results/genrich/cleanBamByName/{}.bam".format(s) for s in g2s[wildcards.group]]
+            ),
+        options=config["GENRICH"], # default:  '-j -y -d 100 -q 0.05 -a 20.0'
+        MQ_MIN=config["MQ_MIN"],
+        chrM=config["chrM"],
+        BLACKLIST=config['BLACKLIST']
+    conda:
+        "../envs/genrich.yaml"
+    threads: 1
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * 16000,
+    shell:
+        "pwd > {log}; Genrich  -v \
+        -t {params.samples} -o {output.peak} -k {output.bedGraph} \
+        {params.options} \
+        -m {params.MQ_MIN} -e {params.chrM} -E {params.BLACKLIST} &>>{log}"
 # rule genrich_group_with_control:

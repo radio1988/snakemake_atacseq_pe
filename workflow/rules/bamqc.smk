@@ -1,4 +1,3 @@
-SAMPLES = config["SAMPLES"]
 dirs = ["sorted_reads", "clean_reads", "markDup"]
 
 
@@ -31,12 +30,12 @@ rule bamqc:
 
 rule bamqc_multiqc:
     input:
-        stats=expand("results/{{d}}_qc/stats/{sample}.stats.txt", sample=SAMPLES),
+        stats=expand("results/{{d}}_qc/stats/{sample}.stats.txt", sample=samples),
         idxstats=expand(
-            "results/{{d}}_qc/idxstats/{sample}.idxstats.txt", sample=SAMPLES
+            "results/{{d}}_qc/idxstats/{sample}.idxstats.txt", sample=samples
         ),
         flagstat=expand(
-            "results/{{d}}_qc/flagstat/{sample}.flagstat.txt", sample=SAMPLES
+            "results/{{d}}_qc/flagstat/{sample}.flagstat.txt", sample=samples
         ),
     output:
         "results/{d}_qc/bamqc_report.html",

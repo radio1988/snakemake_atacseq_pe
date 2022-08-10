@@ -1,4 +1,4 @@
-o2i = {
+o2i_fastqc = {
     # from odir to idir
     # idirs = ['fastq', 'results/trimmed_reads'] # locate fastq files
     # odirs = ['results/fastqc_raw', 'results/fastqc_trimmed'] # fastqc outputs
@@ -12,7 +12,7 @@ rs = ["R1", "R2"]  # suffix
 rule fastqc:
     input:
         lambda wildcards: "{id}/{s}.{r}.fastq.gz".format(
-            id=o2i[wildcards.d], s=wildcards.s, r=wildcards.r
+            id=o2i_fastqc[wildcards.d], s=wildcards.s, r=wildcards.r
         ),
     output:
         "{d}/details/{s}.{r}_fastqc.zip",
@@ -34,7 +34,7 @@ rule fastqc:
 
 rule fastqc_multiqc:
     input:
-        expand("{{d}}/details/{s}.{r}_fastqc.zip", s=config["SAMPLES"], r=rs),
+        expand("{{d}}/details/{s}.{r}_fastqc.zip", s=samples, r=rs),
     output:
         "{d}/fastqc_report.html",
     params:
