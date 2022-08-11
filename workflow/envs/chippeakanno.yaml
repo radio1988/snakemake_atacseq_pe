@@ -1,0 +1,26 @@
+name: chippeakanno
+
+channels:
+    - conda-forge
+    - bioconda
+
+dependencies:
+  # conda-forge
+  - r-base=4.0.2
+  - r-devtools
+  - r-dplyr
+  - r-biocmanager 
+  # # new
+  # - r-plyr
+  # - r-gdata
+  # - r-pheatmap
+  # - r-ashr
+
+  # bioconda
+  - bioconductor-chippeakanno
+  - bioconductor-genomicfeatures 
+  - bioconductor-rtracklayer 
+  - r-readxl
+  - r-writexls
+  - perl-compress-raw-zlib 
+  # - r-ggrepel

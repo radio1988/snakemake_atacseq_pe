@@ -33,6 +33,13 @@ def read_meta(meta_file='config/meta.csv', contrast_file='config/contrast.csv'):
         
     samples = meta['SAMPLE'].tolist()
     groups = meta['GROUP'].tolist()
+    
+    g2s = {}
+    for i in range(len(meta)):
+        group = meta.loc[i, 'GROUP']
+        sample = meta.loc[i, 'SAMPLE']
+        g2s.setdefault(group, []).append(sample)
+    
 
     contrast = pd.read_csv(contrast_file)
     contrast = strip_df(contrast)
@@ -41,11 +48,12 @@ def read_meta(meta_file='config/meta.csv', contrast_file='config/contrast.csv'):
         sys.exit('contrast.csv file has no row or num_columns not 3')
     
     contrast_names = contrast['NAME'].tolist()
-        
-    g2s = {}
-    for i in range(len(meta)):
-        group = meta.loc[i, 'GROUP']
-        sample = meta.loc[i, 'SAMPLE']
-        g2s.setdefault(group, []).append(sample)
     
-    return samples, groups, contrast_names, g2s
+    c2g = {}
+    for i in range(len(contrast_names)):
+        name = contrast['NAME'][i]
+        group_t = contrast['GROUP_T'][i]
+        group_c = contrast['GROUP_C'][i]
+        c2g[name] = [group_t, group_c]
+
+    return samples, groups, contrast_names, g2s, c2g

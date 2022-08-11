@@ -21,3 +21,10 @@ MQ_MIN: 0 # multiBamSummary, plotFingerprint, genrich, default 0
 minFragmentLength: 50  # 100 for mono-nucleosome
 maxFragmentLength: 1000 # 200 for mono-nucleosome ATACseq fragments
 
+# ChIPPeakAnno related
+CHIPPEAKANNO_MODE: overlapping  # overlapping, both (overlapping and nearestLocation), just use overlapping, both mode buggy
+BIDING_LEFT: 5000
+BIDING_RIGHT: 5000 # flanking TSS, for TSS ajacency peak count histogram
+PeakLocForDistance: 'middle' # start, middle
+FeatureLocForDistance: 'TSS'
+

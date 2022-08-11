@@ -3,13 +3,13 @@ import pandas as pd
 from snakemake.utils import min_version
 from scripts.functions import read_meta
 
-min_version("6.14.0")
+#min_version("6.14.0")
 configfile: 'config/config.yaml'
 shell.prefix("""
     
      """)
 
-samples, groups, contrast_names, g2s = read_meta()
+samples, groups, contrast_names, g2s, c2g = read_meta()
 
 
 def targets_input():
@@ -25,7 +25,8 @@ def targets_input():
     L.append(['results/{d}_qc/bamqc_report.html'.format(d=d) for d in ['sorted_reads', 'clean_reads', 'markDup']])
     L.append(['results/genrich/{}.narrowPeak'.format(s) for s in samples])
     L.append(['results/genrich_group/{}.narrowPeak'.format(g) for g in groups])
-
+    L.append(['results/genrich_contrast/{}.narrowPeak'.format(c) for c in contrast_names])
+    L.append(['results/genrich_contrast/{}.narrowPeak.full_anno.xlsx'.format(c) for c in contrast_names])
     return (L)
 
 rule targets:
@@ -42,3 +43,4 @@ include: 'rules/samtools.smk'
 include: 'rules/bam_filter.smk'
 include: 'rules/bamqc.smk'
 include: 'rules/genrich.smk'
+include: 'rules/chippeakanno.smk'

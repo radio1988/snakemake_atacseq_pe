@@ -71,4 +71,68 @@ rule genrich_group:
         -t {params.samples} -o {output.peak} -k {output.bedGraph} \
         {params.options} \
         -m {params.MQ_MIN} -e {params.chrM} -E {params.BLACKLIST} &>>{log}"
-# rule genrich_group_with_control:
+
+def genrich_contrast_input(wildcards):
+    '''
+    return: 
+    [results/genrich/cleanBamByName/Lrig1.bam, 
+    results/genrich/cleanBamByName/Lrig1b.bam, 
+    results/genrich/cleanBamByName/WT_RSmad7.bam, 
+    results/genrich/cleanBamByName/WT_RSmad7b.bam]
+    '''
+    files = []
+    for group in c2g[wildcards['contrast']]:
+        for sample in g2s[group]:
+            files.append("results/genrich/cleanBamByName/{}.bam".format(sample))
+    return files
+
+def genrich_contrast_treatments(wildcards):
+    '''
+    return: "results/genrich/cleanBamByName/Lrig1.bam,results/genrich/cleanBamByName/Lrig1b.bam"
+    '''
+    files = []
+    group = c2g[wildcards['contrast']][0]
+    for sample in g2s[group]:
+        files.append("results/genrich/cleanBamByName/{}.bam".format(sample))    
+    param_str = ",".join(files)
+    return param_str
+
+def genrich_contrast_controls(wildcards):
+    '''
+    return: "results/genrich/cleanBamByName/WT_RSmad7.bam,results/genrich/cleanBamByName/WT_RSmad7b.bam"
+    '''
+    files = []
+    group = c2g[wildcards['contrast']][1]
+    for sample in g2s[group]:
+        files.append("results/genrich/cleanBamByName/{}.bam".format(sample))    
+    param_str = ",".join(files)
+    return param_str
+
+        
+rule genrich_contrast:
+    input:
+        genrich_contrast_input
+    output:
+        peak="results/genrich_contrast/{contrast}.narrowPeak",
+        bedGraph=temp("results/genrich_contrast/{contrast}.bedgraph_ish")
+    log:
+        "results/genrich_contrast/{contrast}.narrowPeak.log",
+    benchmark:
+        "results/genrich_contrast/{contrast}.narrowPeak.benchmark"
+    params:
+        treatments=genrich_contrast_treatments,
+        controls=genrich_contrast_controls,
+        options=config["GENRICH"], # default:  '-j -y -d 100 -q 0.05 -a 20.0'
+        MQ_MIN=config["MQ_MIN"],
+        chrM=config["chrM"],
+        BLACKLIST=config['BLACKLIST']
+    conda:
+        "../envs/genrich.yaml"
+    threads: 1
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * 16000,
+    shell:
+        "pwd > {log}; Genrich  -v \
+        -t {params.treatments} -c {params.controls} -o {output.peak} -k {output.bedGraph} \
+        {params.options} \
+        -m {params.MQ_MIN} -e {params.chrM} -E {params.BLACKLIST} &>>{log}"
