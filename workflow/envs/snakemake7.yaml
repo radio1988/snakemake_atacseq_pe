@@ -1,3 +1,16 @@
+name: snakemake7
+
+channels:
+    - bioconda
+    - conda-forge
+
+dependencies:
+    - bioconda::snakemake=7.12
+    - conda-forge::mamba=0.25 
+
+
+
+
 #name: chiplike 
 ## Install:
 ## conda env create -n chiplike -f scripts/env.yaml
