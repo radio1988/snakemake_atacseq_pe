@@ -136,3 +136,25 @@ rule genrich_contrast:
         -t {params.treatments} -c {params.controls} -o {output.peak} -k {output.bedGraph} \
         {params.options} \
         -m {params.MQ_MIN} -e {params.chrM} -E {params.BLACKLIST} &>>{log}"
+
+rule genrich_bdgToBigWig:
+    input:
+        "results/genrich/{sample}.bedgraph_ish"
+    output:
+        bdg=temp("results/genrich/{sample}.bdg"),
+        bw="results/genrich/{sample}.bw"
+    log:
+        "results/genrich/{sample}.bw.log"
+    benchmark:
+        "results/genrich/{sample}.bw.benchmark"
+    threads:
+        1
+    params:
+        mem_mb=lambda wildcards, attempt: attempt * 8000
+    conda:
+        "../envs/ucsc-bedgraphtobigwig.yaml"
+    shell:
+        """
+        tail -n +3 {input} | cut -f 1,2,3,6 | sort -k1,1 -k2,2n > {output.bdg} 2> {log}
+        bedGraphToBigWig genrich_10bp/{wildcards.sample}.bdg {SizeFile} {output.bw} &>> {log}
+        """
