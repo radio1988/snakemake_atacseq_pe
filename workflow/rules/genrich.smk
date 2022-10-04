@@ -1,4 +1,43 @@
-rule genrich_sort_bam:
+def genrich_contrast_input(wildcards):
+    '''
+    return: 
+    [results/genrich/NameSortedBam/Lrig1.bam, 
+    results/genrich/NameSortedBam/Lrig1b.bam, 
+    results/genrich/NameSortedBam/WT_RSmad7.bam, 
+    results/genrich/NameSortedBam/WT_RSmad7b.bam]
+    '''
+    files = []
+    for group in c2g[wildcards['contrast']]:
+        for sample in g2s[group]:
+            files.append("results/genrich/NameSortedBam/{}.bam".format(sample))
+    return files
+
+
+def genrich_contrast_treatments(wildcards):
+    '''
+    return: "results/genrich/NameSortedBam/Lrig1.bam,results/genrich/NameSortedBam/Lrig1b.bam"
+    '''
+    files = []
+    group = c2g[wildcards['contrast']][0]
+    for sample in g2s[group]:
+        files.append("results/genrich/NameSortedBam/{}.bam".format(sample))    
+    param_str = ",".join(files)
+    return param_str
+
+
+def genrich_contrast_controls(wildcards):
+    '''
+    return: "results/genrich/NameSortedBam/WT_RSmad7.bam,results/genrich/NameSortedBam/WT_RSmad7b.bam"
+    '''
+    files = []
+    group = c2g[wildcards['contrast']][1]
+    for sample in g2s[group]:
+        files.append("results/genrich/NameSortedBam/{}.bam".format(sample))    
+    param_str = ",".join(files)
+    return param_str
+
+
+rule sort_bam_by_name:
     input:
         "results/sorted_reads/{sample}.bam",
     output:
@@ -15,7 +54,40 @@ rule genrich_sort_bam:
     shell:
         "samtools sort -n -@ {threads} -m 2G {input} -o {output} &> {log}"
 
-
+        
+rule genrich_merged:
+    """
+    All samples included
+    """
+    input:
+        expand("results/genrich/NameSortedBam/{s}.bam", s=samples )
+    output:
+        peak="results/genrich/merged.narrowPeak",
+        bedGraph=temp("results/genrich/merged.bedgraph_ish")
+    log:
+        "results/genrich/merged.narrowPeak.log",
+    benchmark:
+        "results/genrich/merged.narrowPeak.benchmark"
+    params:
+        samples=lambda wildcards: ','.join(
+            ["results/genrich/NameSortedBam/{}.bam".format(s) for s in samples]
+            ),
+        options=config["GENRICH"], 
+        MQ_MIN=config["MQ_MIN"],
+        chrM=config["chrM"],
+        BLACKLIST=config['BLACKLIST']
+    conda:
+        "../envs/genrich.yaml"
+    threads: 1
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * 32000,
+    shell:
+        "pwd > {log}; Genrich  -v \
+        -t {params.samples} -o {output.peak} -k {output.bedGraph} \
+        {params.options} \
+        -m {params.MQ_MIN} -e {params.chrM} -E {params.BLACKLIST} &>>{log}"
+        
+        
 rule genrich_sample:
     input:
         "results/genrich/NameSortedBam/{sample}.bam",
@@ -72,43 +144,7 @@ rule genrich_group:
         {params.options} \
         -m {params.MQ_MIN} -e {params.chrM} -E {params.BLACKLIST} &>>{log}"
 
-def genrich_contrast_input(wildcards):
-    '''
-    return: 
-    [results/genrich/NameSortedBam/Lrig1.bam, 
-    results/genrich/NameSortedBam/Lrig1b.bam, 
-    results/genrich/NameSortedBam/WT_RSmad7.bam, 
-    results/genrich/NameSortedBam/WT_RSmad7b.bam]
-    '''
-    files = []
-    for group in c2g[wildcards['contrast']]:
-        for sample in g2s[group]:
-            files.append("results/genrich/NameSortedBam/{}.bam".format(sample))
-    return files
-
-def genrich_contrast_treatments(wildcards):
-    '''
-    return: "results/genrich/NameSortedBam/Lrig1.bam,results/genrich/NameSortedBam/Lrig1b.bam"
-    '''
-    files = []
-    group = c2g[wildcards['contrast']][0]
-    for sample in g2s[group]:
-        files.append("results/genrich/NameSortedBam/{}.bam".format(sample))    
-    param_str = ",".join(files)
-    return param_str
-
-def genrich_contrast_controls(wildcards):
-    '''
-    return: "results/genrich/NameSortedBam/WT_RSmad7.bam,results/genrich/NameSortedBam/WT_RSmad7b.bam"
-    '''
-    files = []
-    group = c2g[wildcards['contrast']][1]
-    for sample in g2s[group]:
-        files.append("results/genrich/NameSortedBam/{}.bam".format(sample))    
-    param_str = ",".join(files)
-    return param_str
-
-        
+                
 rule genrich_contrast:
     input:
         genrich_contrast_input
@@ -137,16 +173,17 @@ rule genrich_contrast:
         {params.options} \
         -m {params.MQ_MIN} -e {params.chrM} -E {params.BLACKLIST} &>>{log}"
 
+        
 rule genrich_bdgToBigWig:
     input:
-        "results/genrich/{sample}.bedgraph_ish"
+        "results/{folder}/{sample}.bedgraph_ish"
     output:
-        bdg=temp("results/genrich/{sample}.bdg"),
-        bw="results/genrich/{sample}.bw"
+        bdg=temp("results/{folder}/{sample}.bdg"),
+        bw="results/{folder}/{sample}.bw"
     log:
-        "results/genrich/{sample}.bw.log"
+        "results/{folder}/{sample}.bw.log"
     benchmark:
-        "results/genrich/{sample}.bw.benchmark"
+        "results/{folder}/{sample}.bw.benchmark"
     threads:
         1
     params:

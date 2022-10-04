@@ -16,16 +16,17 @@ def targets_input():
     L = []
     L.append('results/workflow.svg')
     L.append(['results/{d}/fastqc_report.html'.format(d=d) for d in ['fastqc_raw', 'fastqc_trimmed']])
-    #L.append(['results/dedup/' + s + '.bam' for s in samples])  # test
     #L.append(['results/{d}_qc/bamqc_report.html'.format(d=d) for d in ['sorted_reads', 'clean_reads', 'markDup']])
     L.append('results/sorted_reads_qc/bamqc_report.html')
     #L.append("results/clean_reads_chipqc/done")
+    L.append(['results/genrich/merged.narrowPeak', 'results/genrich/merged.bw'])
+    L.append(['results/genrich/merged.narrowPeak.full_anno.xlsx', 'results/genrich/merged.featurecount.txt'])
     L.append(['results/genrich/{}.narrowPeak'.format(s) for s in samples])
     L.append(['results/genrich/{}.bw'.format(s) for s in samples])
     L.append(['results/genrich_group/{}.narrowPeak'.format(g) for g in groups])
+    L.append(["results/genrich_group/{}.narrowPeak.full_anno.xlsx".format(g) for g in groups])
     L.append(['results/genrich_contrast/{}.narrowPeak'.format(c) for c in contrast_names])
     L.append(['results/genrich_contrast/{}.narrowPeak.full_anno.xlsx'.format(c) for c in contrast_names])
-    L.append(["results/genrich_group/{}.narrowPeak.full_anno.xlsx".format(g) for g in groups])
     return (L)
 
 rule targets:
@@ -44,3 +45,4 @@ include: 'rules/bamqc.smk'
 include: 'rules/chipqc.smk'
 include: 'rules/genrich.smk'
 include: 'rules/chippeakanno.smk'
+include: 'rules/featurecount.smk'
