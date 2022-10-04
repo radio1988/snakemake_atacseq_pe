@@ -1,24 +1,24 @@
 rule genrich_sort_bam:
     input:
-        "results/clean_reads/{sample}.bam",
+        "results/sorted_reads/{sample}.bam",
     output:
-        temp("results/genrich/cleanBamByName/{sample}.bam"),
+        temp("results/genrich/NameSortedBam/{sample}.bam"),
     log:
-        "results/genrich/cleanBamByName/{sample}.bam.log",
+        "results/genrich/NameSortedBam/{sample}.bam.log",
     benchmark:
-        "results/genrich/cleanBamByName/{sample}.bam.benchmark"
+        "results/genrich/NameSortedBam/{sample}.bam.benchmark"
     conda:
         "../envs/samtools.yaml"
-    threads: 2
+    threads: 4
     resources:
         mem_mb=lambda wildcards, attempt: attempt * 2500
     shell:
-        "samtools sort -n -@ 2 -m 2G {input} -o {output} &> {log}"
+        "samtools sort -n -@ {threads} -m 2G {input} -o {output} &> {log}"
 
 
 rule genrich_sample:
     input:
-        "results/genrich/cleanBamByName/{sample}.bam",
+        "results/genrich/NameSortedBam/{sample}.bam",
     output:
         peak="results/genrich/{sample}.narrowPeak",
         bedGraph=temp("results/genrich/{sample}.bedgraph_ish")
@@ -27,7 +27,7 @@ rule genrich_sample:
     benchmark:
         "results/genrich/{sample}.narrowPeak.benchmark"
     params:
-        options=config["GENRICH"], # default:  '-j -y -d 100 -q 0.05 -a 20.0'
+        options=config["GENRICH"], 
         MQ_MIN=config["MQ_MIN"],
         chrM=config["chrM"],
         BLACKLIST=config['BLACKLIST']
@@ -45,7 +45,7 @@ rule genrich_sample:
               
 rule genrich_group:
     input:
-        lambda wildcards: ["results/genrich/cleanBamByName/{}.bam".format(s) for s in g2s[wildcards.group]],
+        lambda wildcards: ["results/genrich/NameSortedBam/{}.bam".format(s) for s in g2s[wildcards.group]],
     output:
         peak="results/genrich_group/{group}.narrowPeak",
         bedGraph=temp("results/genrich_group/{group}.bedgraph_ish")
@@ -55,7 +55,7 @@ rule genrich_group:
         "results/genrich_group/{group}.narrowPeak.benchmark"
     params:
         samples=lambda wildcards: ','.join(
-            ["results/genrich/cleanBamByName/{}.bam".format(s) for s in g2s[wildcards.group]]
+            ["results/genrich/NameSortedBam/{}.bam".format(s) for s in g2s[wildcards.group]]
             ),
         options=config["GENRICH"], # default:  '-j -y -d 100 -q 0.05 -a 20.0'
         MQ_MIN=config["MQ_MIN"],
@@ -75,36 +75,36 @@ rule genrich_group:
 def genrich_contrast_input(wildcards):
     '''
     return: 
-    [results/genrich/cleanBamByName/Lrig1.bam, 
-    results/genrich/cleanBamByName/Lrig1b.bam, 
-    results/genrich/cleanBamByName/WT_RSmad7.bam, 
-    results/genrich/cleanBamByName/WT_RSmad7b.bam]
+    [results/genrich/NameSortedBam/Lrig1.bam, 
+    results/genrich/NameSortedBam/Lrig1b.bam, 
+    results/genrich/NameSortedBam/WT_RSmad7.bam, 
+    results/genrich/NameSortedBam/WT_RSmad7b.bam]
     '''
     files = []
     for group in c2g[wildcards['contrast']]:
         for sample in g2s[group]:
-            files.append("results/genrich/cleanBamByName/{}.bam".format(sample))
+            files.append("results/genrich/NameSortedBam/{}.bam".format(sample))
     return files
 
 def genrich_contrast_treatments(wildcards):
     '''
-    return: "results/genrich/cleanBamByName/Lrig1.bam,results/genrich/cleanBamByName/Lrig1b.bam"
+    return: "results/genrich/NameSortedBam/Lrig1.bam,results/genrich/NameSortedBam/Lrig1b.bam"
     '''
     files = []
     group = c2g[wildcards['contrast']][0]
     for sample in g2s[group]:
-        files.append("results/genrich/cleanBamByName/{}.bam".format(sample))    
+        files.append("results/genrich/NameSortedBam/{}.bam".format(sample))    
     param_str = ",".join(files)
     return param_str
 
 def genrich_contrast_controls(wildcards):
     '''
-    return: "results/genrich/cleanBamByName/WT_RSmad7.bam,results/genrich/cleanBamByName/WT_RSmad7b.bam"
+    return: "results/genrich/NameSortedBam/WT_RSmad7.bam,results/genrich/NameSortedBam/WT_RSmad7b.bam"
     '''
     files = []
     group = c2g[wildcards['contrast']][1]
     for sample in g2s[group]:
-        files.append("results/genrich/cleanBamByName/{}.bam".format(sample))    
+        files.append("results/genrich/NameSortedBam/{}.bam".format(sample))    
     param_str = ",".join(files)
     return param_str
 
@@ -150,11 +150,13 @@ rule genrich_bdgToBigWig:
     threads:
         1
     params:
-        mem_mb=lambda wildcards, attempt: attempt * 8000
+        mem_mb=16000,
+        size_file=config['SizeFile']
     conda:
         "../envs/ucsc-bedgraphtobigwig.yaml"
     shell:
         """
-        tail -n +3 {input} | cut -f 1,2,3,6 | sort -k1,1 -k2,2n > {output.bdg} 2> {log}
-        bedGraphToBigWig genrich_10bp/{wildcards.sample}.bdg {SizeFile} {output.bw} &>> {log}
+        tail -n +3 {input} | cut -f 1,2,3,6 |grep -ve '\sNA' | LC_COLLATE=C sort -k1,1 -k2,2n > {output.bdg} 2> {log}
+#        bedSort {input} {output.bdg} &> {log}
+        bedGraphToBigWig {output.bdg} {params.size_file} {output.bw} &>> {log}
         """
